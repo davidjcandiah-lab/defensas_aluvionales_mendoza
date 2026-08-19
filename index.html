@@ -10,12 +10,14 @@
 
     <title>Cartografía Digital - Mendoza</title>
 
+
     <!-- =========================================================
          LEAFLET
     ========================================================== -->
 
     <link rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
 
     <!-- MiniMapa -->
 
@@ -31,18 +33,29 @@
 
         html,
         body {
+
             height: 100%;
+
             margin: 0;
+
             padding: 0;
+
         }
+
 
         body {
+
             font-family: "Open Sans", Arial, sans-serif;
+
         }
 
+
         #map {
+
             width: 100%;
+
             height: 100%;
+
         }
 
 
@@ -51,17 +64,28 @@
         ===================================================== */
 
         .info {
+
             background: white;
+
             padding: 10px 14px;
+
             box-shadow: 0 0 15px rgba(0,0,0,0.20);
+
             border-radius: 6px;
+
             min-width: 180px;
+
             font-size: 13px;
+
         }
 
+
         .info h4 {
+
             margin: 0 0 6px 0;
+
             font-size: 14px;
+
         }
 
 
@@ -70,34 +94,60 @@
         ===================================================== */
 
         .legend {
+
             background: white;
+
             padding: 10px 12px;
+
             box-shadow: 0 0 15px rgba(0,0,0,0.20);
+
             border-radius: 6px;
+
             line-height: 20px;
+
             color: #333;
+
             font-size: 12px;
+
         }
+
 
         .legend h4 {
+
             margin: 0 0 8px 0;
+
             font-size: 13px;
+
             text-transform: uppercase;
+
             border-bottom: 1px solid #ddd;
+
             padding-bottom: 5px;
+
         }
+
 
         .legend-item {
+
             display: flex;
+
             align-items: center;
+
             margin-bottom: 4px;
+
         }
 
+
         .legend-symbol {
+
             width: 18px;
+
             height: 18px;
+
             margin-right: 7px;
+
             display: inline-block;
+
         }
 
 
@@ -106,40 +156,46 @@
         ===================================================== */
 
         .popup-title {
+
             font-weight: bold;
+
             font-size: 15px;
+
             margin-bottom: 8px;
+
             border-bottom: 1px solid #ddd;
+
             padding-bottom: 5px;
+
         }
+
 
         .popup-table {
+
             border-collapse: collapse;
+
             width: 100%;
+
             font-size: 12px;
+
         }
+
 
         .popup-table td {
+
             padding: 3px 5px;
+
             vertical-align: top;
+
         }
+
 
         .popup-table td:first-child {
+
             font-weight: bold;
+
             white-space: nowrap;
-        }
 
-
-        /* =====================================================
-           CARGA
-        ===================================================== */
-
-        .loading {
-            background: white;
-            padding: 8px 12px;
-            border-radius: 5px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.15);
-            font-size: 13px;
         }
 
 
@@ -150,17 +206,27 @@
         @media (max-width: 600px) {
 
             .info {
+
                 font-size: 11px;
+
                 min-width: 130px;
+
             }
+
 
             .legend {
+
                 font-size: 10px;
+
                 max-width: 150px;
+
             }
 
+
             .leaflet-control-layers {
+
                 font-size: 11px;
+
             }
 
         }
@@ -185,6 +251,7 @@
 ========================================================== -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.js"></script>
 
@@ -233,6 +300,7 @@ const osm = L.tileLayer(
 
 const capas = {};
 
+
 const capasBase = {
 
     "OpenStreetMap": osm
@@ -256,7 +324,9 @@ info.onAdd = function () {
     this._div = L.DomUtil.create("div", "info");
 
     this._div.innerHTML =
+
         "<h4>Cartografía Digital</h4>" +
+
         "Seleccione una entidad para consultar información.";
 
     return this._div;
@@ -269,13 +339,19 @@ info.update = function (contenido) {
     if (contenido) {
 
         this._div.innerHTML =
+
             "<h4>Información</h4>" +
+
             contenido;
 
-    } else {
+    }
+
+    else {
 
         this._div.innerHTML =
+
             "<h4>Cartografía Digital</h4>" +
+
             "Seleccione una entidad para consultar información.";
 
     }
@@ -293,9 +369,13 @@ info.addTo(map);
 function generarPopup(titulo, propiedades, campos) {
 
     let html =
+
         '<div class="popup-title">' +
+
         titulo +
+
         "</div>";
+
 
     html += '<table class="popup-table">';
 
@@ -304,16 +384,33 @@ function generarPopup(titulo, propiedades, campos) {
 
         let valor = propiedades[campo];
 
+
         if (
+
             valor !== undefined &&
+
             valor !== null &&
+
             valor !== ""
+
         ) {
 
             html +=
+
                 "<tr>" +
-                "<td>" + campo + "</td>" +
-                "<td>" + valor + "</td>" +
+
+                "<td>" +
+
+                campo +
+
+                "</td>" +
+
+                "<td>" +
+
+                valor +
+
+                "</td>" +
+
                 "</tr>";
 
         }
@@ -322,6 +419,7 @@ function generarPopup(titulo, propiedades, campos) {
 
 
     html += "</table>";
+
 
     return html;
 
@@ -339,7 +437,13 @@ function cargarAlturas() {
         .then(response => {
 
             if (!response.ok)
-                throw new Error("No se pudo cargar Alturas.geojson");
+
+                throw new Error(
+
+                    "No se pudo cargar Alturas.geojson"
+
+                );
+
 
             return response.json();
 
@@ -358,13 +462,21 @@ function cargarAlturas() {
                             className: "",
 
                             html:
+
                                 '<div style="' +
+
                                 'width:0;' +
+
                                 'height:0;' +
+
                                 'border-left:7px solid transparent;' +
+
                                 'border-right:7px solid transparent;' +
+
                                 'border-bottom:14px solid #8B4513;' +
+
                                 'transform:rotate(180deg);' +
+
                                 '"></div>',
 
                             iconSize: [14, 14],
@@ -377,9 +489,11 @@ function cargarAlturas() {
 
                 },
 
+
                 onEachFeature: function(feature, layer) {
 
                     const p = feature.properties;
+
 
                     layer.bindPopup(
 
@@ -390,11 +504,17 @@ function cargarAlturas() {
                             p,
 
                             [
+
                                 "TIPO",
+
                                 "NOMBRE",
+
                                 "COTA",
+
                                 "OBSERVACIO",
+
                                 "FUENTE"
+
                             ]
 
                         )
@@ -407,6 +527,7 @@ function cargarAlturas() {
 
 
             capas["Alturas"] = layer;
+
 
             layer.addTo(map);
 
@@ -426,21 +547,32 @@ function colorColector(tipo) {
     switch (tipo) {
 
         case "Matriz":
+
             return "#E41A1C";
 
+
         case "Descargador":
+
             return "#377EB8";
 
+
         case "Canalización Intermedia":
+
             return "#4DAF4A";
 
+
         case "Gran colector aluvional":
+
             return "#984EA3";
 
+
         case "Escudo":
+
             return "#FF7F00";
 
+
         default:
+
             return "#666666";
 
     }
@@ -455,7 +587,13 @@ function cargarColectores() {
         .then(response => {
 
             if (!response.ok)
-                throw new Error("No se pudo cargar Colectores.geojson");
+
+                throw new Error(
+
+                    "No se pudo cargar Colectores.geojson"
+
+                );
+
 
             return response.json();
 
@@ -470,8 +608,11 @@ function cargarColectores() {
                     return {
 
                         color:
+
                             colorColector(
+
                                 feature.properties.TIPO
+
                             ),
 
                         weight: 3,
@@ -482,9 +623,11 @@ function cargarColectores() {
 
                 },
 
+
                 onEachFeature: function(feature, layer) {
 
                     const p = feature.properties;
+
 
                     layer.bindPopup(
 
@@ -495,12 +638,19 @@ function cargarColectores() {
                             p,
 
                             [
+
                                 "NOMBRE",
+
                                 "TIPO",
+
                                 "AREACUENCA",
+
                                 "LONGITUD",
+
                                 "CAPACIDAD",
+
                                 "Clase"
+
                             ]
 
                         )
@@ -513,6 +663,7 @@ function cargarColectores() {
 
 
             capas["Colectores"] = layer;
+
 
             layer.addTo(map);
 
@@ -534,7 +685,13 @@ function cargarCursosAgua() {
         .then(response => {
 
             if (!response.ok)
-                throw new Error("No se pudo cargar Cursos de Agua.geojson");
+
+                throw new Error(
+
+                    "No se pudo cargar Cursos de Agua.geojson"
+
+                );
+
 
             return response.json();
 
@@ -554,9 +711,11 @@ function cargarCursosAgua() {
 
                 },
 
+
                 onEachFeature: function(feature, layer) {
 
                     const p = feature.properties;
+
 
                     layer.bindPopup(
 
@@ -567,7 +726,9 @@ function cargarCursosAgua() {
                             p,
 
                             [
+
                                 "NOMBRE"
+
                             ]
 
                         )
@@ -580,6 +741,7 @@ function cargarCursosAgua() {
 
 
             capas["Cursos de Agua"] = layer;
+
 
             layer.addTo(map);
 
@@ -597,14 +759,23 @@ function cargarCursosAgua() {
 const coloresDiques = [
 
     "#E41A1C",
+
     "#377EB8",
+
     "#4DAF4A",
+
     "#984EA3",
+
     "#FF7F00",
+
     "#A65628",
+
     "#F781BF",
+
     "#999999",
+
     "#66C2A5",
+
     "#FC8D62"
 
 ];
@@ -613,7 +784,9 @@ const coloresDiques = [
 function obtenerColorDique(indice) {
 
     return coloresDiques[
+
         indice % coloresDiques.length
+
     ];
 
 }
@@ -626,7 +799,13 @@ function cargarDiques() {
         .then(response => {
 
             if (!response.ok)
-                throw new Error("No se pudo cargar Diques.geojson");
+
+                throw new Error(
+
+                    "No se pudo cargar Diques.geojson"
+
+                );
+
 
             return response.json();
 
@@ -639,11 +818,14 @@ function cargarDiques() {
                 style: function(feature) {
 
                     const indice =
+
                         data.features.indexOf(feature);
+
 
                     return {
 
                         color:
+
                             obtenerColorDique(indice),
 
                         weight: 4,
@@ -654,16 +836,20 @@ function cargarDiques() {
 
                 },
 
+
                 onEachFeature: function(feature, layer) {
 
                     const p = feature.properties;
+
 
                     layer.bindPopup(
 
                         generarPopup(
 
                             p.NOMBRE ||
+
                             p.NAME ||
+
                             "Dique",
 
                             p,
@@ -680,6 +866,7 @@ function cargarDiques() {
 
 
             capas["Diques"] = layer;
+
 
             layer.addTo(map);
 
@@ -701,7 +888,13 @@ function cargarLocalidades() {
         .then(response => {
 
             if (!response.ok)
-                throw new Error("No se pudo cargar Localidades.geojson");
+
+                throw new Error(
+
+                    "No se pudo cargar Localidades.geojson"
+
+                );
+
 
             return response.json();
 
@@ -735,25 +928,34 @@ function cargarLocalidades() {
 
                 },
 
+
                 onEachFeature: function(feature, layer) {
 
                     const p = feature.properties;
+
 
                     layer.bindPopup(
 
                         generarPopup(
 
                             p.LOCALIDAD ||
+
                             "Localidad",
 
                             p,
 
                             [
+
                                 "LOCALIDAD",
+
                                 "DISTRITO",
+
                                 "DEPTO",
+
                                 "C_POSTAL",
+
                                 "DIST_MZA"
+
                             ]
 
                         )
@@ -766,6 +968,7 @@ function cargarLocalidades() {
 
 
             capas["Localidades"] = layer;
+
 
             layer.addTo(map);
 
@@ -780,50 +983,72 @@ function cargarLocalidades() {
    11. RUTAS
 ============================================================ */
 
+
 /*
-   Colores asignados automáticamente a las categorías
-   existentes en TIPO_1.
+   Colores disponibles para las categorías de TIPO_1.
 */
 
 const coloresRutas = [
+
     "#E41A1C",
+
     "#377EB8",
+
     "#4DAF4A",
+
     "#984EA3",
+
     "#FF7F00",
+
     "#A65628",
+
     "#F781BF",
+
     "#00A6A6",
+
     "#FFD92F",
+
     "#666666"
+
 ];
 
 
 /*
-   Diccionario que relaciona cada categoría de TIPO_1
+   Diccionario que relaciona cada valor de TIPO_1
    con un color.
 */
 
 const coloresPorTipoRuta = {};
 
+
 function colorRuta(tipo) {
 
     /*
-       Si la categoría todavía no tiene color,
-       se le asigna el siguiente disponible.
+       Si TIPO_1 todavía no tiene un color,
+       se le asigna uno automáticamente.
     */
 
     if (!coloresPorTipoRuta.hasOwnProperty(tipo)) {
 
         const cantidad =
-            Object.keys(coloresPorTipoRuta).length;
+
+            Object.keys(
+
+                coloresPorTipoRuta
+
+            ).length;
+
 
         coloresPorTipoRuta[tipo] =
+
             coloresRutas[
+
                 cantidad % coloresRutas.length
+
             ];
 
     }
+
 
     return coloresPorTipoRuta[tipo];
 
@@ -837,7 +1062,13 @@ function cargarRutas() {
         .then(response => {
 
             if (!response.ok)
-                throw new Error("No se pudo cargar Rutas.geojson");
+
+                throw new Error(
+
+                    "No se pudo cargar Rutas.geojson"
+
+                );
+
 
             return response.json();
 
@@ -848,7 +1079,7 @@ function cargarRutas() {
             const layer = L.geoJSON(data, {
 
                 /*
-                   El color depende de TIPO_1
+                   Color según TIPO_1
                 */
 
                 style: function(feature) {
@@ -856,8 +1087,11 @@ function cargarRutas() {
                     return {
 
                         color:
+
                             colorRuta(
+
                                 feature.properties.TIPO_1
+
                             ),
 
                         weight: 3,
@@ -870,12 +1104,13 @@ function cargarRutas() {
 
 
                 /*
-                   Popup
+                   Popup únicamente con NAME_1
                 */
 
                 onEachFeature: function(feature, layer) {
 
                     const p = feature.properties;
+
 
                     layer.bindPopup(
 
@@ -886,7 +1121,9 @@ function cargarRutas() {
                             p,
 
                             [
+
                                 "NAME_1"
+
                             ]
 
                         )
@@ -899,6 +1136,7 @@ function cargarRutas() {
 
 
             capas["Rutas"] = layer;
+
 
             layer.addTo(map);
 
@@ -920,7 +1158,13 @@ function cargarHoja() {
         .then(response => {
 
             if (!response.ok)
-                throw new Error("No se pudo cargar Hoja 3369-16.geojson");
+
+                throw new Error(
+
+                    "No se pudo cargar Hoja 3369-16.geojson"
+
+                );
+
 
             return response.json();
 
@@ -929,6 +1173,11 @@ function cargarHoja() {
         .then(data => {
 
             const layer = L.geoJSON(data, {
+
+                /*
+                   Línea negra.
+                   Sin relleno.
+                */
 
                 style: {
 
@@ -940,9 +1189,11 @@ function cargarHoja() {
 
                 },
 
+
                 onEachFeature: function(feature, layer) {
 
                     const p = feature.properties;
+
 
                     layer.bindPopup(
 
@@ -964,6 +1215,7 @@ function cargarHoja() {
 
 
             capas["Hoja 3369-16"] = layer;
+
 
             layer.addTo(map);
 
@@ -1105,9 +1357,14 @@ setTimeout(function() {
 
     );
 
+
     try {
 
-        if (grupo.getLayers().length > 0) {
+        if (
+
+            grupo.getLayers().length > 0
+
+        ) {
 
             map.fitBounds(
 
@@ -1128,7 +1385,9 @@ setTimeout(function() {
     catch(error) {
 
         console.log(
+
             "No fue posible calcular la extensión automática."
+
         );
 
     }
