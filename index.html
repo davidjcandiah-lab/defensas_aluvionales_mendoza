@@ -2,61 +2,138 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Visor de Mapas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualizador de Capas GeoJSON - GitHub</title>
+
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <style>
-    body, html { margin: 0; padding: 0; height: 100%; width: 100%; }
-    #map { width: 100%; height: 100vh; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    /* Estilo de la leyenda o panel de información */
+    .info-panel {
+      padding: 10px;
+      background: white;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 5px;
+      line-height: 18px;
+      color: #333;
+    }
   </style>
 </head>
 <body>
 
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></script>
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // 1. Inicializar mapa
-    const map = L.map('map').setView([-32.89, -68.84], 12);
+    // 1. Inicializar el mapa centrado aproximadamente en las coordenadas del proyecto (Mendoza, Argentina)
+    const map = L.map('map').setView([-32.92, -68.85], 12);
 
-    // 2. Capa base
+    // 2. Agregar mapa base de OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // 3. Cargar archivos GeoJSON externos usando fetch
-    Promise.all([
-      fetch('alturas.geojson').then(res => res.json()),
-      fetch('colectores.geojson').then(res => res.json())
-    ])
-    .then(([dataAlturas, dataColectores]) => {
+    // Control de capas para activar/desactivar en el mapa
+    const overlayMaps = {};
+    const layerControl = L.control.layers(null, overlayMaps, { collapsed: false }).addTo(map);
 
-      // Capa Alturas (Puntos)
-      const layerAlturas = L.geoJSON(dataAlturas, {
-        pointToLayer: (feature, latlng) => L.circleMarker(latlng, { radius: 8, fillColor: "#e67e22", color: "#d35400" }),
-        onEachFeature: (feature, layer) => {
-          layer.bindPopup(`<b>${feature.properties.NOMBRE || 'Sin nombre'}</b><br>Cota: ${feature.properties.COTA || '-'} m`);
-        }
-      }).addTo(map);
+    // -------------------------------------------------------------
+    // Funciones para cargar capas GeoJSON relativas desde GitHub
+    // -------------------------------------------------------------
 
-      // Capa Colectores (Líneas)
-      const layerColectores = L.geoJSON(dataColectores, {
-        style: feature => ({ color: feature.properties.Clase === "Zanjon" ? "#c0392b" : "#2980b9", weight: 4 }),
-        onEachFeature: (feature, layer) => {
-          layer.bindPopup(`<b>${feature.properties.NOMBRE || 'Sin nombre'}</b><br>Longitud: ${feature.properties.LONGITUD || '-'}`);
-        }
-      }).addTo(map);
+    // Estilo para la capa de Alturas (Puntos)
+    function cargarAlturas() {
+      // Ruta relativa al archivo en el mismo repositorio
+      fetch('alturas.geojson')
+        .then(response => {
+          if (!response.ok) throw new Error('No se pudo cargar alturas.geojson');
+          return response.json();
+        })
+        .then(data => {
+          const capaAlturas = L.geoJSON(data, {
+            pointToLayer: function (feature, latlng) {
+              return L.circleMarker(latlng, {
+                radius: 7,
+                fillColor: "#e74c3c",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+              });
+            },
+            onEachFeature: function (feature, layer) {
+              if (feature.properties) {
+                let popupContent = `<b>Tipo:</b> ${feature.properties.TIPO || ''}<br>` +
+                                   `<b>Nombre:</b> ${feature.properties.NOMBRE || ''}<br>` +
+                                   `<b>Cota:</b> ${feature.properties.COTA || ''} m<br>` +
+                                   `<b>Fuente:</b> ${feature.properties.FUENTE || ''}`;
+                layer.bindPopup(popupContent);
+              }
+            }
+          }).addTo(map);
 
-      // Ajustar la vista para encuadrar todos los datos
-      const bounds = L.featureGroup([layerAlturas, layerColectores]).getBounds();
-      if (bounds.isValid()) map.fitBounds(bounds);
+          layerControl.addOverlay(capaAlturas, "Alturas (Cerros)");
+        })
+        .catch(error => console.error('Error cargando Alturas:', error));
+    }
 
-      // Control de capas
-      L.control.layers(null, { "Alturas": layerAlturas, "Colectores": layerColectores }).addTo(map);
+    // Estilo para la capa de Colectores (Líneas / MultiLineString)
+    function cargarColectores() {
+      // Ruta relativa al archivo en el mismo repositorio
+      fetch('colectores.geojson')
+        .then(response => {
+          if (!response.ok) throw new Error('No se pudo cargar colectores.geojson');
+          return response.json();
+        })
+        .then(data => {
+          const capaColectores = L.geoJSON(data, {
+            style: function (feature) {
+              // Asignar color diferente si es Canal, Colector o Zanjón
+              let color = "#3498db";
+              if (feature.properties.Clase === "Zanjon") color = "#8e44ad";
+              if (feature.properties.Clase === "Canal") color = "#16a085";
 
-    })
-    .catch(err => console.error("Error cargando los archivos GeoJSON:", err));
+              return {
+                color: color,
+                weight: 4,
+                opacity: 0.8
+              };
+            },
+            onEachFeature: function (feature, layer) {
+              if (feature.properties) {
+                let popupContent = `<b>Nombre:</b> ${feature.properties.NOMBRE || ''}<br>` +
+                                   `<b>Tipo:</b> ${feature.properties.TIPO || ''}<br>` +
+                                   `<b>Clase:</b> ${feature.properties.Clase || ''}<br>` +
+                                   `<b>Longitud:</b> ${feature.properties.LONGITUD || 'N/A'}<br>` +
+                                   `<b>Capacidad:</b> ${feature.properties.CAPACIDAD || 'N/A'}<br>` +
+                                   `<b>Obs:</b> ${feature.properties.OBSERVACIO || 'Sin observaciones'}`;
+                layer.bindPopup(popupContent);
+              }
+            }
+          }).addTo(map);
+
+          layerControl.addOverlay(capaColectores, "Colectores y Canales");
+        })
+        .catch(error => console.error('Error cargando Colectores:', error));
+    }
+
+    // Ejecutar la carga de los archivos
+    cargarAlturas();
+    cargarColectores();
   </script>
 </body>
 </html>
