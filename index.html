@@ -131,19 +131,6 @@
 
 
         /* =====================================================
-           CARGA
-        ===================================================== */
-
-        .loading {
-            background: white;
-            padding: 8px 12px;
-            border-radius: 5px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.15);
-            font-size: 13px;
-        }
-
-
-        /* =====================================================
            ADAPTACIÓN A CELULARES
         ===================================================== */
 
@@ -198,9 +185,9 @@
 
 const map = L.map("map", {
 
-    center: [-32.8895373,-68.8436872],
+    center: [-34.6, -68.5],
 
-    zoom: 2,
+    zoom: 7,
 
     zoomControl: true
 
@@ -646,7 +633,7 @@ function cargarDiques() {
                         color:
                             obtenerColorDique(indice),
 
-                        weight: 8,
+                        weight: 4,
 
                         opacity: 0.9
 
@@ -749,6 +736,7 @@ function cargarLocalidades() {
                             p,
 
                             [
+                                "LOCALIDAD",
                                 "DISTRITO",
                                 "DEPTO",
                                 "C_POSTAL",
@@ -779,27 +767,6 @@ function cargarLocalidades() {
    11. RUTAS
 ============================================================ */
 
-function colorRuta(tipo) {
-
-    switch (tipo) {
-
-        case "Nacional":
-            return "#E31A1C";
-
-        case "Provincial":
-            return "#377EB8";
-
-        case "Departamental":
-            return "#4DAF4A";
-
-        default:
-            return "#777777";
-
-    }
-
-}
-
-
 function cargarRutas() {
 
     fetch("Rutas.geojson")
@@ -817,20 +784,13 @@ function cargarRutas() {
 
             const layer = L.geoJSON(data, {
 
-                style: function(feature) {
+                style: {
 
-                    return {
+                    color: "#555555",
 
-                        color:
-                            colorRuta(
-                                feature.properties.TIPO_1
-                            ),
+                    weight: 3,
 
-                        weight: 3,
-
-                        opacity: 0.9
-
-                    };
+                    opacity: 0.9
 
                 },
 
