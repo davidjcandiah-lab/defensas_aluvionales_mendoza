@@ -18,6 +18,7 @@
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
     <!-- MiniMapa -->
+
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.css"/>
 
@@ -130,7 +131,7 @@
 
 
         /* =====================================================
-           BOTÓN DE CARGA
+           CARGA
         ===================================================== */
 
         .loading {
@@ -143,7 +144,7 @@
 
 
         /* =====================================================
-           RESPONSIVE
+           ADAPTACIÓN A CELULARES
         ===================================================== */
 
         @media (max-width: 600px) {
@@ -328,52 +329,7 @@ function generarPopup(titulo, propiedades, campos) {
 
 
 /* ============================================================
-   6. FUNCIÓN GENERAL DE RESALTADO
-============================================================ */
-
-function resaltar(feature, layer) {
-
-    layer.on({
-
-        mouseover: function(e) {
-
-            const target = e.target;
-
-            if (target.setStyle) {
-
-                target.setStyle({
-
-                    weight: 4,
-
-                    color: "#00FFFF",
-
-                    fillOpacity: 0.85
-
-                });
-
-            }
-
-            layer.bringToFront();
-
-        },
-
-        mouseout: function(e) {
-
-            if (layer.resetStyle) {
-
-                layer.resetStyle(e.target);
-
-            }
-
-        }
-
-    });
-
-}
-
-
-/* ============================================================
-   7. ALTURAS
+   6. ALTURAS
 ============================================================ */
 
 function cargarAlturas() {
@@ -462,7 +418,7 @@ function cargarAlturas() {
 
 
 /* ============================================================
-   8. COLECTORES
+   7. COLECTORES
 ============================================================ */
 
 function colorColector(tipo) {
@@ -551,8 +507,6 @@ function cargarColectores() {
 
                     );
 
-                    resaltar(feature, layer);
-
                 }
 
             });
@@ -570,7 +524,7 @@ function cargarColectores() {
 
 
 /* ============================================================
-   9. CURSOS DE AGUA
+   8. CURSOS DE AGUA
 ============================================================ */
 
 function cargarCursosAgua() {
@@ -623,8 +577,6 @@ function cargarCursosAgua() {
 
                     );
 
-                    resaltar(feature, layer);
-
                 }
 
             });
@@ -642,7 +594,7 @@ function cargarCursosAgua() {
 
 
 /* ============================================================
-   10. DIQUES
+   9. DIQUES
 ============================================================ */
 
 const coloresDiques = [
@@ -725,8 +677,6 @@ function cargarDiques() {
 
                     );
 
-                    resaltar(feature, layer);
-
                 }
 
             });
@@ -744,7 +694,7 @@ function cargarDiques() {
 
 
 /* ============================================================
-   11. LOCALIDADES
+   10. LOCALIDADES
 ============================================================ */
 
 function cargarLocalidades() {
@@ -813,34 +763,6 @@ function cargarLocalidades() {
 
                     );
 
-                    layer.on({
-
-                        mouseover: function(e) {
-
-                            e.target.setStyle({
-
-                                radius: 9,
-
-                                fillColor: "#00FFFF"
-
-                            });
-
-                        },
-
-                        mouseout: function(e) {
-
-                            e.target.setStyle({
-
-                                radius: 6,
-
-                                fillColor: "#111111"
-
-                            });
-
-                        }
-
-                    });
-
                 }
 
             });
@@ -858,7 +780,7 @@ function cargarLocalidades() {
 
 
 /* ============================================================
-   12. RUTAS
+   11. RUTAS
 ============================================================ */
 
 function colorRuta(tipo) {
@@ -936,8 +858,6 @@ function cargarRutas() {
 
                     );
 
-                    resaltar(feature, layer);
-
                 }
 
             });
@@ -955,7 +875,7 @@ function cargarRutas() {
 
 
 /* ============================================================
-   13. HOJA CARTOGRÁFICA
+   12. HOJA 3369-16
 ============================================================ */
 
 function cargarHoja() {
@@ -981,11 +901,7 @@ function cargarHoja() {
 
                     weight: 2,
 
-                    fillColor: "#FFFFFF",
-
-                    fillOpacity: 0.05,
-
-                    dashArray: "6 4"
+                    fill: false
 
                 },
 
@@ -1007,8 +923,6 @@ function cargarHoja() {
 
                     );
 
-                    resaltar(feature, layer);
-
                 }
 
             });
@@ -1026,7 +940,7 @@ function cargarHoja() {
 
 
 /* ============================================================
-   14. CARGAR TODAS LAS CAPAS
+   13. CARGAR TODAS LAS CAPAS
 ============================================================ */
 
 cargarAlturas();
@@ -1045,7 +959,7 @@ cargarHoja();
 
 
 /* ============================================================
-   15. CONTROL DE CAPAS
+   14. CONTROL DE CAPAS
 ============================================================ */
 
 setTimeout(function() {
@@ -1070,7 +984,7 @@ setTimeout(function() {
 
 
 /* ============================================================
-   16. ESCALA
+   15. ESCALA
 ============================================================ */
 
 L.control.scale({
@@ -1085,7 +999,7 @@ L.control.scale({
 
 
 /* ============================================================
-   17. MINI-MAPA
+   16. MINI-MAPA
 ============================================================ */
 
 const miniMapTile = L.tileLayer(
@@ -1145,13 +1059,8 @@ const miniMap = new L.Control.MiniMap(
 
 
 /* ============================================================
-   18. ZOOM AUTOMÁTICO
+   17. ZOOM AUTOMÁTICO
 ============================================================ */
-
-/*
-    Esperamos a que las capas se carguen y luego
-    calculamos automáticamente su extensión.
-*/
 
 setTimeout(function() {
 
@@ -1193,7 +1102,7 @@ setTimeout(function() {
 
 
 /* ============================================================
-   19. CONTROL DE ERRORES
+   18. CONTROL DE ERRORES
 ============================================================ */
 
 window.addEventListener(
@@ -1203,8 +1112,11 @@ window.addEventListener(
     function(event) {
 
         console.error(
+
             "Error cargando datos:",
+
             event.reason
+
         );
 
     }
