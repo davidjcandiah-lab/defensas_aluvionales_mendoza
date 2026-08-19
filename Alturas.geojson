@@ -1,0 +1,9 @@
+{
+"type": "FeatureCollection",
+"name": "Alturas",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "fid": 1, "TIPO": "CERRO", "NOMBRE": "DEL ARCO", "COTA": 1675.0, "OBSERVACIO": null, "FUENTE": "IGN" }, "geometry": { "type": "Point", "coordinates": [ -68.935234069824332, -32.835018157959226 ] } },
+{ "type": "Feature", "properties": { "fid": 2, "TIPO": "CERRO", "NOMBRE": "DE LA GLORIA", "COTA": 984.0, "OBSERVACIO": null, "FUENTE": "IGN" }, "geometry": { "type": "Point", "coordinates": [ -68.890953063964943, -32.888015747070583 ] } }
+]
+}
