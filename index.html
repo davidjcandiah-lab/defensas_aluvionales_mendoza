@@ -558,20 +558,17 @@ function cargarCursosAgua() {
 
                     const p = feature.properties;
 
-                    const titulo =
-                        p.NOMBRE ||
-                        p.NOMBRE_1 ||
-                        "Curso de agua";
-
                     layer.bindPopup(
 
                         generarPopup(
 
-                            titulo,
+                            "Curso de agua",
 
                             p,
 
-                            Object.keys(p)
+                            [
+                                "NOMBRE"
+                            ]
 
                         )
 
