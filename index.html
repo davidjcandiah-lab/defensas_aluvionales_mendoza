@@ -780,23 +780,52 @@ function cargarLocalidades() {
    11. RUTAS
 ============================================================ */
 
+/*
+   Colores asignados automáticamente a las categorías
+   existentes en TIPO_1.
+*/
+
+const coloresRutas = [
+    "#E41A1C",
+    "#377EB8",
+    "#4DAF4A",
+    "#984EA3",
+    "#FF7F00",
+    "#A65628",
+    "#F781BF",
+    "#00A6A6",
+    "#FFD92F",
+    "#666666"
+];
+
+
+/*
+   Diccionario que relaciona cada categoría de TIPO_1
+   con un color.
+*/
+
+const coloresPorTipoRuta = {};
+
 function colorRuta(tipo) {
 
-    switch (tipo) {
+    /*
+       Si la categoría todavía no tiene color,
+       se le asigna el siguiente disponible.
+    */
 
-        case "Nacional":
-            return "#E31A1C";
+    if (!coloresPorTipoRuta.hasOwnProperty(tipo)) {
 
-        case "Provincial":
-            return "#377EB8";
+        const cantidad =
+            Object.keys(coloresPorTipoRuta).length;
 
-        case "Departamental":
-            return "#4DAF4A";
-
-        default:
-            return "#777777";
+        coloresPorTipoRuta[tipo] =
+            coloresRutas[
+                cantidad % coloresRutas.length
+            ];
 
     }
+
+    return coloresPorTipoRuta[tipo];
 
 }
 
@@ -818,6 +847,10 @@ function cargarRutas() {
 
             const layer = L.geoJSON(data, {
 
+                /*
+                   El color depende de TIPO_1
+                */
+
                 style: function(feature) {
 
                     return {
@@ -835,6 +868,11 @@ function cargarRutas() {
 
                 },
 
+
+                /*
+                   Popup
+                */
+
                 onEachFeature: function(feature, layer) {
 
                     const p = feature.properties;
@@ -843,13 +881,13 @@ function cargarRutas() {
 
                         generarPopup(
 
-                            p.NOMBRE ||
-                            p.NOMBRE_1 ||
-                            "Ruta",
+                            p.NAME_1 || "Ruta",
 
                             p,
 
-                            Object.keys(p)
+                            [
+                                "NAME_1"
+                            ]
 
                         )
 
