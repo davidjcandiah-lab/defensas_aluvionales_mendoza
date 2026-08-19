@@ -1,170 +1,62 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Visor de Mapas - Alturas y Colectores</title>
-
-  <!-- Leaflet CSS -->
-  <link 
-    rel="stylesheet" 
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
-
+  <meta charset="UTF-8">
+  <title>Visor de Mapas</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      font-family: Arial, sans-serif;
-    }
-    #map {
-      width: 100%;
-      height: 100vh;
-    }
-    /* Estilos personalizados para los popups */
-    .leaflet-popup-content h4 {
-      margin: 0 0 5px 0;
-      color: #333;
-    }
-    .leaflet-popup-content table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .leaflet-popup-content td {
-      padding: 3px 5px;
-      border-bottom: 1px solid #eee;
-    }
-    .leaflet-popup-content td.label {
-      font-weight: bold;
-    }
+    body, html { margin: 0; padding: 0; height: 100%; width: 100%; }
+    #map { width: 100%; height: 100vh; }
   </style>
 </head>
 <body>
 
   <div id="map"></div>
 
-  <!-- Leaflet JS -->
-  <script 
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin="">
-  </script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // 1. Datos GeoJSON embedded o leídos directamente
-    const dataAlturas = {
-      "type": "FeatureCollection",
-      "name": "Alturas",
-      "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-      "features": [
-        { "type": "Feature", "properties": { "fid": 1, "TIPO": "CERRO", "NOMBRE": "DEL ARCO", "COTA": 1675.0, "OBSERVACIO": null, "FUENTE": "IGN" }, "geometry": { "type": "Point", "coordinates": [ -68.935234069824332, -32.835018157959226 ] } },
-        { "type": "Feature", "properties": { "fid": 2, "TIPO": "CERRO", "NOMBRE": "DE LA GLORIA", "COTA": 984.0, "OBSERVACIO": null, "FUENTE": "IGN" }, "geometry": { "type": "Point", "coordinates": [ -68.890953063964943, -32.888015747070583 ] } }
-      ]
-    };
-
-    const dataColectores = {
-      "type": "FeatureCollection",
-      "name": "Colectores",
-      "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-      "features": [
-        { "type": "Feature", "properties": { "fid": 1, "NOMBRE": "CANAL SOSA", "TIPO": "Matriz", "AREACUENCA": null, "LONGITUD": "3.58 km", "CAPACIDAD": "200 m3/s", "OBSERVACIO": "Forma parte de un sistema mixto en conjunto con el sistema de riego. Pendiente media del 2%", "Clase": "Canal" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -68.908645204435444, -32.900054891382689 ], [ -68.865347145113603, -32.994242862605503 ] ] ] } },
-        { "type": "Feature", "properties": { "fid": 2, "NOMBRE": "COLECTOR BALCARCE", "TIPO": "Descargador", "AREACUENCA": null, "LONGITUD": "1.30 km", "CAPACIDAD": null, "OBSERVACIO": "Recoge los desagues pluviales del area que antiguamente ocupaba el Zanjon Maure, que desagua directamente al\nCanal Cacique Guaymallen.", "Clase": "Colector" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -68.842268403576725, -32.922866495153052 ], [ -68.838552324613275, -32.911852758368155 ] ] ] } },
-        { "type": "Feature", "properties": { "fid": 3, "NOMBRE": "COLECTOR BARRIO LOS CERRILLOS", "TIPO": "Canalización Intermedia", "AREACUENCA": null, "LONGITUD": "0.91 km", "CAPACIDAD": null, "OBSERVACIO": "Suelo Natural", "Clase": "Colector" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -68.887871599800107, -32.905398925500272 ], [ -68.87981712431376, -32.909370961787907 ] ] ] } },
-        { "type": "Feature", "properties": { "fid": 4, "NOMBRE": "CANAL RIO SECO", "TIPO": "Descargador", "AREACUENCA": null, "LONGITUD": "1.61 km", "CAPACIDAD": null, "OBSERVACIO": "Suelo natural", "Clase": "Canal" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -68.880429231018439, -32.965473878279973 ], [ -68.865712290219165, -32.960819693922105 ] ] ] } },
-        { "type": "Feature", "properties": { "fid": 5, "NOMBRE": "RIO SECO TEJO - VIAMONTE  -  LINIERS", "TIPO": "Matriz", "AREACUENCA": null, "LONGITUD": "5.43 km", "CAPACIDAD": "80 m3/s", "OBSERVACIO": "Forma parte de un sistema mixto en conjunto con el sistema de riego", "Clase": "Zanjon" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -68.89005369130011, -32.983565969400253 ], [ -68.853207300710935, -32.95874891261505 ] ] ] } },
-        { "type": "Feature", "properties": { "fid": 6, "NOMBRE": "ZANJON CACIQUE GUAYMALLEN", "TIPO": "Gran colector aluvional", "AREACUENCA": null, "LONGITUD": "27 km", "CAPACIDAD": "250 m3/s", "OBSERVACIO": "Es el principal canal de riego y de desague aluvional que atraviesa, de Sur a Norte. Tiene multiples funciones. Entre 15 y 20 metros de ancho y entre 2 y 3,5 metros de alto.", "Clase": "Zanjon" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -68.867434717283359, -33.000054891382696 ], [ -68.727615383856744, -32.84293422001805 ] ] ] } }
-      ]
-    };
-
-    // 2. Inicializar el Mapa centrado en la zona de Mendoza, Argentina
+    // 1. Inicializar mapa
     const map = L.map('map').setView([-32.89, -68.84], 12);
 
-    // 3. Añadir la capa base (OpenStreetMap)
-    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap contributors'
+    // 2. Capa base
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Capa Satelital opcional
-    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri'
-    });
+    // 3. Cargar archivos GeoJSON externos usando fetch
+    Promise.all([
+      fetch('alturas.geojson').then(res => res.json()),
+      fetch('colectores.geojson').then(res => res.json())
+    ])
+    .then(([dataAlturas, dataColectores]) => {
 
-    // 4. Capa Alturas (Puntos / Cerro)
-    const layerAlturas = L.geoJSON(dataAlturas, {
-      pointToLayer: function (feature, latlng) {
-        return L.circleMarker(latlng, {
-          radius: 8,
-          fillColor: "#e67e22",
-          color: "#d35400",
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0.8
-        });
-      },
-      onEachFeature: function (feature, layer) {
-        const props = feature.properties;
-        let popupContent = `<h4>⛰️ ${props.NOMBRE || 'Sin nombre'}</h4>`;
-        popupContent += `<table>`;
-        if (props.TIPO) popupContent += `<tr><td class="label">Tipo:</td><td>${props.TIPO}</td></tr>`;
-        if (props.COTA) popupContent += `<tr><td class="label">Cota:</td><td>${props.COTA} m.s.n.m.</td></tr>`;
-        if (props.FUENTE) popupContent += `<tr><td class="label">Fuente:</td><td>${props.FUENTE}</td></tr>`;
-        if (props.OBSERVACIO) popupContent += `<tr><td class="label">Obs:</td><td>${props.OBSERVACIO}</td></tr>`;
-        popupContent += `</table>`;
-        layer.bindPopup(popupContent);
-      }
-    }).addTo(map);
+      // Capa Alturas (Puntos)
+      const layerAlturas = L.geoJSON(dataAlturas, {
+        pointToLayer: (feature, latlng) => L.circleMarker(latlng, { radius: 8, fillColor: "#e67e22", color: "#d35400" }),
+        onEachFeature: (feature, layer) => {
+          layer.bindPopup(`<b>${feature.properties.NOMBRE || 'Sin nombre'}</b><br>Cota: ${feature.properties.COTA || '-'} m`);
+        }
+      }).addTo(map);
 
-    // 5. Capa Colectores (Líneas / Canales / Zanjones)
-    const layerColectores = L.geoJSON(dataColectores, {
-      style: function (feature) {
-        // Asignar colores según la clase o el tipo
-        let color = "#2980b9";
-        if (feature.properties.Clase === "Zanjon") color = "#c0392b";
-        if (feature.properties.Clase === "Canal") color = "#27ae60";
+      // Capa Colectores (Líneas)
+      const layerColectores = L.geoJSON(dataColectores, {
+        style: feature => ({ color: feature.properties.Clase === "Zanjon" ? "#c0392b" : "#2980b9", weight: 4 }),
+        onEachFeature: (feature, layer) => {
+          layer.bindPopup(`<b>${feature.properties.NOMBRE || 'Sin nombre'}</b><br>Longitud: ${feature.properties.LONGITUD || '-'}`);
+        }
+      }).addTo(map);
 
-        return {
-          color: color,
-          weight: 4,
-          opacity: 0.8
-        };
-      },
-      onEachFeature: function (feature, layer) {
-        const props = feature.properties;
-        let popupContent = `<h4>🌊 ${props.NOMBRE || 'Sin nombre'}</h4>`;
-        popupContent += `<table>`;
-        if (props.Clase) popupContent += `<tr><td class="label">Clase:</td><td>${props.Clase}</td></tr>`;
-        if (props.TIPO) popupContent += `<tr><td class="label">Tipo:</td><td>${props.TIPO}</td></tr>`;
-        if (props.LONGITUD) popupContent += `<tr><td class="label">Longitud:</td><td>${props.LONGITUD}</td></tr>`;
-        if (props.CAPACIDAD) popupContent += `<tr><td class="label">Capacidad:</td><td>${props.CAPACIDAD}</td></tr>`;
-        if (props.OBSERVACIO) popupContent += `<tr><td class="label">Obs:</td><td>${props.OBSERVACIO}</td></tr>`;
-        popupContent += `</table>`;
-        layer.bindPopup(popupContent);
-      }
-    }).addTo(map);
+      // Ajustar la vista para encuadrar todos los datos
+      const bounds = L.featureGroup([layerAlturas, layerColectores]).getBounds();
+      if (bounds.isValid()) map.fitBounds(bounds);
 
-    // 6. Ajustar la vista del mapa automáticamente para mostrar todas las capas
-    const bounds = L.featureGroup([layerAlturas, layerColectores]).getBounds();
-    if (bounds.isValid()) {
-      map.fitBounds(bounds, { padding: [30, 30] });
-    }
+      // Control de capas
+      L.control.layers(null, { "Alturas": layerAlturas, "Colectores": layerColectores }).addTo(map);
 
-    // 7. Control de Capas (Permite encender y apagar capas)
-    const baseMaps = {
-      "Mapa Base (OSM)": osmLayer,
-      "Satelital (Esri)": satelliteLayer
-    };
-
-    const overlayMaps = {
-      "Alturas / Cerros": layerAlturas,
-      "Colectores / Canales": layerColectores
-    };
-
-    L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
+    })
+    .catch(err => console.error("Error cargando los archivos GeoJSON:", err));
   </script>
 </body>
 </html>
