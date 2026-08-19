@@ -1,0 +1,1220 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cartografía Digital - Mendoza</title>
+
+    <!-- =========================================================
+         LEAFLET
+    ========================================================== -->
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+    <!-- MiniMapa -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.css"/>
+
+
+    <!-- =========================================================
+         ESTILOS
+    ========================================================== -->
+
+    <style>
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Open Sans", Arial, sans-serif;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+
+        /* =====================================================
+           CONTROL DE INFORMACIÓN
+        ===================================================== */
+
+        .info {
+            background: white;
+            padding: 10px 14px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.20);
+            border-radius: 6px;
+            min-width: 180px;
+            font-size: 13px;
+        }
+
+        .info h4 {
+            margin: 0 0 6px 0;
+            font-size: 14px;
+        }
+
+
+        /* =====================================================
+           LEYENDA
+        ===================================================== */
+
+        .legend {
+            background: white;
+            padding: 10px 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.20);
+            border-radius: 6px;
+            line-height: 20px;
+            color: #333;
+            font-size: 12px;
+        }
+
+        .legend h4 {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .legend-symbol {
+            width: 18px;
+            height: 18px;
+            margin-right: 7px;
+            display: inline-block;
+        }
+
+
+        /* =====================================================
+           POPUPS
+        ===================================================== */
+
+        .popup-title {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .popup-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+        }
+
+        .popup-table td {
+            padding: 3px 5px;
+            vertical-align: top;
+        }
+
+        .popup-table td:first-child {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+
+        /* =====================================================
+           BOTÓN DE CARGA
+        ===================================================== */
+
+        .loading {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+            font-size: 13px;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 600px) {
+
+            .info {
+                font-size: 11px;
+                min-width: 130px;
+            }
+
+            .legend {
+                font-size: 10px;
+                max-width: 150px;
+            }
+
+            .leaflet-control-layers {
+                font-size: 11px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     MAPA
+========================================================== -->
+
+<div id="map"></div>
+
+
+<!-- =========================================================
+     LEAFLET
+========================================================== -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.js"></script>
+
+
+<script>
+
+
+/* ============================================================
+   1. INICIALIZACIÓN DEL MAPA
+============================================================ */
+
+const map = L.map("map", {
+
+    center: [-34.6, -68.5],
+
+    zoom: 7,
+
+    zoomControl: true
+
+});
+
+
+/* ============================================================
+   2. MAPA BASE OPENSTREETMAP
+============================================================ */
+
+const osm = L.tileLayer(
+
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+    {
+
+        attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+
+        maxZoom: 19
+
+    }
+
+).addTo(map);
+
+
+/* ============================================================
+   3. GRUPOS DE CAPAS
+============================================================ */
+
+const capas = {};
+
+const capasBase = {
+
+    "OpenStreetMap": osm
+
+};
+
+
+/* ============================================================
+   4. CONTROL DE INFORMACIÓN
+============================================================ */
+
+const info = L.control({
+
+    position: "topright"
+
+});
+
+
+info.onAdd = function () {
+
+    this._div = L.DomUtil.create("div", "info");
+
+    this._div.innerHTML =
+        "<h4>Cartografía Digital</h4>" +
+        "Seleccione una entidad para consultar información.";
+
+    return this._div;
+
+};
+
+
+info.update = function (contenido) {
+
+    if (contenido) {
+
+        this._div.innerHTML =
+            "<h4>Información</h4>" +
+            contenido;
+
+    } else {
+
+        this._div.innerHTML =
+            "<h4>Cartografía Digital</h4>" +
+            "Seleccione una entidad para consultar información.";
+
+    }
+
+};
+
+
+info.addTo(map);
+
+
+/* ============================================================
+   5. FUNCIÓN PARA GENERAR POPUPS
+============================================================ */
+
+function generarPopup(titulo, propiedades, campos) {
+
+    let html =
+        '<div class="popup-title">' +
+        titulo +
+        "</div>";
+
+    html += '<table class="popup-table">';
+
+
+    campos.forEach(function(campo) {
+
+        let valor = propiedades[campo];
+
+        if (
+            valor !== undefined &&
+            valor !== null &&
+            valor !== ""
+        ) {
+
+            html +=
+                "<tr>" +
+                "<td>" + campo + "</td>" +
+                "<td>" + valor + "</td>" +
+                "</tr>";
+
+        }
+
+    });
+
+
+    html += "</table>";
+
+    return html;
+
+}
+
+
+/* ============================================================
+   6. FUNCIÓN GENERAL DE RESALTADO
+============================================================ */
+
+function resaltar(feature, layer) {
+
+    layer.on({
+
+        mouseover: function(e) {
+
+            const target = e.target;
+
+            if (target.setStyle) {
+
+                target.setStyle({
+
+                    weight: 4,
+
+                    color: "#00FFFF",
+
+                    fillOpacity: 0.85
+
+                });
+
+            }
+
+            layer.bringToFront();
+
+        },
+
+        mouseout: function(e) {
+
+            if (layer.resetStyle) {
+
+                layer.resetStyle(e.target);
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* ============================================================
+   7. ALTURAS
+============================================================ */
+
+function cargarAlturas() {
+
+    fetch("Alturas.geojson")
+
+        .then(response => {
+
+            if (!response.ok)
+                throw new Error("No se pudo cargar Alturas.geojson");
+
+            return response.json();
+
+        })
+
+        .then(data => {
+
+            const layer = L.geoJSON(data, {
+
+                pointToLayer: function(feature, latlng) {
+
+                    return L.marker(latlng, {
+
+                        icon: L.divIcon({
+
+                            className: "",
+
+                            html:
+                                '<div style="' +
+                                'width:0;' +
+                                'height:0;' +
+                                'border-left:7px solid transparent;' +
+                                'border-right:7px solid transparent;' +
+                                'border-bottom:14px solid #8B4513;' +
+                                'transform:rotate(180deg);' +
+                                '"></div>',
+
+                            iconSize: [14, 14],
+
+                            iconAnchor: [7, 7]
+
+                        })
+
+                    });
+
+                },
+
+                onEachFeature: function(feature, layer) {
+
+                    const p = feature.properties;
+
+                    layer.bindPopup(
+
+                        generarPopup(
+
+                            p.NOMBRE || "Altura",
+
+                            p,
+
+                            [
+                                "TIPO",
+                                "NOMBRE",
+                                "COTA",
+                                "OBSERVACIO",
+                                "FUENTE"
+                            ]
+
+                        )
+
+                    );
+
+                }
+
+            });
+
+
+            capas["Alturas"] = layer;
+
+            layer.addTo(map);
+
+        })
+
+        .catch(error => console.error(error));
+
+}
+
+
+/* ============================================================
+   8. COLECTORES
+============================================================ */
+
+function colorColector(tipo) {
+
+    switch (tipo) {
+
+        case "Matriz":
+            return "#E41A1C";
+
+        case "Descargador":
+            return "#377EB8";
+
+        case "Canalización Intermedia":
+            return "#4DAF4A";
+
+        case "Gran colector aluvional":
+            return "#984EA3";
+
+        case "Escudo":
+            return "#FF7F00";
+
+        default:
+            return "#666666";
+
+    }
+
+}
+
+
+function cargarColectores() {
+
+    fetch("Colectores.geojson")
+
+        .then(response => {
+
+            if (!response.ok)
+                throw new Error("No se pudo cargar Colectores.geojson");
+
+            return response.json();
+
+        })
+
+        .then(data => {
+
+            const layer = L.geoJSON(data, {
+
+                style: function(feature) {
+
+                    return {
+
+                        color:
+                            colorColector(
+                                feature.properties.TIPO
+                            ),
+
+                        weight: 3,
+
+                        opacity: 0.9
+
+                    };
+
+                },
+
+                onEachFeature: function(feature, layer) {
+
+                    const p = feature.properties;
+
+                    layer.bindPopup(
+
+                        generarPopup(
+
+                            p.NOMBRE || "Colector",
+
+                            p,
+
+                            [
+                                "NOMBRE",
+                                "TIPO",
+                                "AREACUENCA",
+                                "LONGITUD",
+                                "CAPACIDAD",
+                                "Clase"
+                            ]
+
+                        )
+
+                    );
+
+                    resaltar(feature, layer);
+
+                }
+
+            });
+
+
+            capas["Colectores"] = layer;
+
+            layer.addTo(map);
+
+        })
+
+        .catch(error => console.error(error));
+
+}
+
+
+/* ============================================================
+   9. CURSOS DE AGUA
+============================================================ */
+
+function cargarCursosAgua() {
+
+    fetch("Cursos de Agua.geojson")
+
+        .then(response => {
+
+            if (!response.ok)
+                throw new Error("No se pudo cargar Cursos de Agua.geojson");
+
+            return response.json();
+
+        })
+
+        .then(data => {
+
+            const layer = L.geoJSON(data, {
+
+                style: {
+
+                    color: "#2389DA",
+
+                    weight: 2,
+
+                    opacity: 0.9
+
+                },
+
+                onEachFeature: function(feature, layer) {
+
+                    const p = feature.properties;
+
+                    const titulo =
+                        p.NOMBRE ||
+                        p.NOMBRE_1 ||
+                        "Curso de agua";
+
+                    layer.bindPopup(
+
+                        generarPopup(
+
+                            titulo,
+
+                            p,
+
+                            Object.keys(p)
+
+                        )
+
+                    );
+
+                    resaltar(feature, layer);
+
+                }
+
+            });
+
+
+            capas["Cursos de Agua"] = layer;
+
+            layer.addTo(map);
+
+        })
+
+        .catch(error => console.error(error));
+
+}
+
+
+/* ============================================================
+   10. DIQUES
+============================================================ */
+
+const coloresDiques = [
+
+    "#E41A1C",
+    "#377EB8",
+    "#4DAF4A",
+    "#984EA3",
+    "#FF7F00",
+    "#A65628",
+    "#F781BF",
+    "#999999",
+    "#66C2A5",
+    "#FC8D62"
+
+];
+
+
+function obtenerColorDique(indice) {
+
+    return coloresDiques[
+        indice % coloresDiques.length
+    ];
+
+}
+
+
+function cargarDiques() {
+
+    fetch("Diques.geojson")
+
+        .then(response => {
+
+            if (!response.ok)
+                throw new Error("No se pudo cargar Diques.geojson");
+
+            return response.json();
+
+        })
+
+        .then(data => {
+
+            const layer = L.geoJSON(data, {
+
+                style: function(feature) {
+
+                    const indice =
+                        data.features.indexOf(feature);
+
+                    return {
+
+                        color:
+                            obtenerColorDique(indice),
+
+                        weight: 4,
+
+                        opacity: 0.9
+
+                    };
+
+                },
+
+                onEachFeature: function(feature, layer) {
+
+                    const p = feature.properties;
+
+                    layer.bindPopup(
+
+                        generarPopup(
+
+                            p.NOMBRE ||
+                            p.NAME ||
+                            "Dique",
+
+                            p,
+
+                            Object.keys(p)
+
+                        )
+
+                    );
+
+                    resaltar(feature, layer);
+
+                }
+
+            });
+
+
+            capas["Diques"] = layer;
+
+            layer.addTo(map);
+
+        })
+
+        .catch(error => console.error(error));
+
+}
+
+
+/* ============================================================
+   11. LOCALIDADES
+============================================================ */
+
+function cargarLocalidades() {
+
+    fetch("Localidades.geojson")
+
+        .then(response => {
+
+            if (!response.ok)
+                throw new Error("No se pudo cargar Localidades.geojson");
+
+            return response.json();
+
+        })
+
+        .then(data => {
+
+            const layer = L.geoJSON(data, {
+
+                pointToLayer: function(feature, latlng) {
+
+                    return L.circleMarker(
+
+                        latlng,
+
+                        {
+
+                            radius: 6,
+
+                            fillColor: "#111111",
+
+                            color: "#FFFFFF",
+
+                            weight: 1.5,
+
+                            fillOpacity: 0.9
+
+                        }
+
+                    );
+
+                },
+
+                onEachFeature: function(feature, layer) {
+
+                    const p = feature.properties;
+
+                    layer.bindPopup(
+
+                        generarPopup(
+
+                            p.LOCALIDAD ||
+                            "Localidad",
+
+                            p,
+
+                            [
+                                "LOCALIDAD",
+                                "DISTRITO",
+                                "DEPTO",
+                                "C_POSTAL",
+                                "DIST_MZA"
+                            ]
+
+                        )
+
+                    );
+
+                    layer.on({
+
+                        mouseover: function(e) {
+
+                            e.target.setStyle({
+
+                                radius: 9,
+
+                                fillColor: "#00FFFF"
+
+                            });
+
+                        },
+
+                        mouseout: function(e) {
+
+                            e.target.setStyle({
+
+                                radius: 6,
+
+                                fillColor: "#111111"
+
+                            });
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+
+            capas["Localidades"] = layer;
+
+            layer.addTo(map);
+
+        })
+
+        .catch(error => console.error(error));
+
+}
+
+
+/* ============================================================
+   12. RUTAS
+============================================================ */
+
+function colorRuta(tipo) {
+
+    switch (tipo) {
+
+        case "Nacional":
+            return "#E31A1C";
+
+        case "Provincial":
+            return "#377EB8";
+
+        case "Departamental":
+            return "#4DAF4A";
+
+        default:
+            return "#777777";
+
+    }
+
+}
+
+
+function cargarRutas() {
+
+    fetch("Rutas.geojson")
+
+        .then(response => {
+
+            if (!response.ok)
+                throw new Error("No se pudo cargar Rutas.geojson");
+
+            return response.json();
+
+        })
+
+        .then(data => {
+
+            const layer = L.geoJSON(data, {
+
+                style: function(feature) {
+
+                    return {
+
+                        color:
+                            colorRuta(
+                                feature.properties.TIPO_1
+                            ),
+
+                        weight: 3,
+
+                        opacity: 0.9
+
+                    };
+
+                },
+
+                onEachFeature: function(feature, layer) {
+
+                    const p = feature.properties;
+
+                    layer.bindPopup(
+
+                        generarPopup(
+
+                            p.NOMBRE ||
+                            p.NOMBRE_1 ||
+                            "Ruta",
+
+                            p,
+
+                            Object.keys(p)
+
+                        )
+
+                    );
+
+                    resaltar(feature, layer);
+
+                }
+
+            });
+
+
+            capas["Rutas"] = layer;
+
+            layer.addTo(map);
+
+        })
+
+        .catch(error => console.error(error));
+
+}
+
+
+/* ============================================================
+   13. HOJA CARTOGRÁFICA
+============================================================ */
+
+function cargarHoja() {
+
+    fetch("Hoja 3369-16.geojson")
+
+        .then(response => {
+
+            if (!response.ok)
+                throw new Error("No se pudo cargar Hoja 3369-16.geojson");
+
+            return response.json();
+
+        })
+
+        .then(data => {
+
+            const layer = L.geoJSON(data, {
+
+                style: {
+
+                    color: "#000000",
+
+                    weight: 2,
+
+                    fillColor: "#FFFFFF",
+
+                    fillOpacity: 0.05,
+
+                    dashArray: "6 4"
+
+                },
+
+                onEachFeature: function(feature, layer) {
+
+                    const p = feature.properties;
+
+                    layer.bindPopup(
+
+                        generarPopup(
+
+                            "Hoja cartográfica",
+
+                            p,
+
+                            Object.keys(p)
+
+                        )
+
+                    );
+
+                    resaltar(feature, layer);
+
+                }
+
+            });
+
+
+            capas["Hoja 3369-16"] = layer;
+
+            layer.addTo(map);
+
+        })
+
+        .catch(error => console.error(error));
+
+}
+
+
+/* ============================================================
+   14. CARGAR TODAS LAS CAPAS
+============================================================ */
+
+cargarAlturas();
+
+cargarColectores();
+
+cargarCursosAgua();
+
+cargarDiques();
+
+cargarLocalidades();
+
+cargarRutas();
+
+cargarHoja();
+
+
+/* ============================================================
+   15. CONTROL DE CAPAS
+============================================================ */
+
+setTimeout(function() {
+
+    L.control.layers(
+
+        capasBase,
+
+        capas,
+
+        {
+
+            collapsed: false,
+
+            position: "topright"
+
+        }
+
+    ).addTo(map);
+
+}, 1000);
+
+
+/* ============================================================
+   16. ESCALA
+============================================================ */
+
+L.control.scale({
+
+    imperial: false,
+
+    metric: true,
+
+    position: "bottomleft"
+
+}).addTo(map);
+
+
+/* ============================================================
+   17. MINI-MAPA
+============================================================ */
+
+const miniMapTile = L.tileLayer(
+
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+    {
+
+        attribution: "© OpenStreetMap"
+
+    }
+
+);
+
+
+const miniMap = new L.Control.MiniMap(
+
+    miniMapTile,
+
+    {
+
+        position: "bottomleft",
+
+        toggleDisplay: true,
+
+        minimized: false,
+
+        width: 150,
+
+        height: 150,
+
+        aimingRectOptions: {
+
+            color: "#2EA3F2",
+
+            weight: 1
+
+        },
+
+        shadowRectOptions: {
+
+            color: "#000000",
+
+            weight: 1,
+
+            opacity: 0,
+
+            fillOpacity: 0
+
+        },
+
+        zoomLevelFixed: 5
+
+    }
+
+).addTo(map);
+
+
+/* ============================================================
+   18. ZOOM AUTOMÁTICO
+============================================================ */
+
+/*
+    Esperamos a que las capas se carguen y luego
+    calculamos automáticamente su extensión.
+*/
+
+setTimeout(function() {
+
+    const grupo = L.featureGroup(
+
+        Object.values(capas)
+
+    );
+
+    try {
+
+        if (grupo.getLayers().length > 0) {
+
+            map.fitBounds(
+
+                grupo.getBounds(),
+
+                {
+
+                    padding: [20, 20]
+
+                }
+
+            );
+
+        }
+
+    }
+
+    catch(error) {
+
+        console.log(
+            "No fue posible calcular la extensión automática."
+        );
+
+    }
+
+}, 2500);
+
+
+/* ============================================================
+   19. CONTROL DE ERRORES
+============================================================ */
+
+window.addEventListener(
+
+    "unhandledrejection",
+
+    function(event) {
+
+        console.error(
+            "Error cargando datos:",
+            event.reason
+        );
+
+    }
+
+);
+
+
+</script>
+
+</body>
+
+</html>
+```
